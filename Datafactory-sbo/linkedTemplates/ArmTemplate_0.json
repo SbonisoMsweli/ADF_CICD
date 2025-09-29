@@ -1673,6 +1673,93 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/deltaflow')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "ds_csv_dynamic",
+								"type": "DatasetReference"
+							},
+							"name": "source"
+						}
+					],
+					"sinks": [
+						{
+							"linkedService": {
+								"referenceName": "LS_datalake",
+								"type": "LinkedServiceReference"
+							},
+							"name": "SinkDelta"
+						}
+					],
+					"transformations": [
+						{
+							"name": "Upperstate"
+						},
+						{
+							"name": "SelectCols"
+						},
+						{
+							"name": "AlterRow"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          location_id as short,",
+						"          city as string,",
+						"          state as string,",
+						"          country as string,",
+						"          latitude as double,",
+						"          longitude as double,",
+						"          last_updated_timestamp as timestamp",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> source",
+						"source derive(state = upper(state)) ~> Upperstate",
+						"Upperstate select(mapColumn(",
+						"          location_id,",
+						"          city,",
+						"          state,",
+						"          country,",
+						"          last_updated_timestamp",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SelectCols",
+						"SelectCols alterRow(upsertIf(1==1)) ~> AlterRow",
+						"AlterRow sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     format: 'delta',",
+						"     fileSystem: 'sink',",
+						"     folderPath: 'DeltaSink',",
+						"     mergeSchema: false,",
+						"     autoCompact: false,",
+						"     optimizedWrite: false,",
+						"     vacuum: 0,",
+						"     deletable: false,",
+						"     insertable: false,",
+						"     updateable: false,",
+						"     upsertable: true,",
+						"     keys:['location_id'],",
+						"     umask: 0022,",
+						"     preCommands: [],",
+						"     postCommands: [],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SinkDelta"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/ds_csv_dynamic')]",
+				"[concat(variables('factoryId'), '/linkedServices/LS_datalake')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/scheduled')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1760,6 +1847,56 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/IngestionPipeline')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/deltalake')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Data flow",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "deltaflow",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"source": {
+										"p_container": "source",
+										"p_folder": "deltasource",
+										"p_file": "locations.csv"
+									},
+									"SinkDelta": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/deltaflow')]"
 			]
 		},
 		{
