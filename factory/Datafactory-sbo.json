@@ -1,0 +1,9 @@
+{
+	"name": "Datafactory-sbo",
+	"location": "southafricanorth",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "7ed5621d-60e6-418a-8e83-fd5163960066",
+		"tenantId": "161d5c41-6afa-4b8c-89c2-3e3b7ccd8f1d"
+	}
+}
