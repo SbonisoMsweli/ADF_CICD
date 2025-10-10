@@ -1,3 +1,6 @@
+<img width="1040" height="536" alt="Azure Arch" src="https://github.com/user-attachments/assets/6c606ecd-4724-46be-93f3-4b82b3961094" />
+
+
 <img width="1378" height="545" alt="ingestion_azure" src="https://github.com/user-attachments/assets/85a29be5-cbc8-42d1-8faa-af86092b4305" />
 
 <img width="1336" height="289" alt="Routing" src="https://github.com/user-attachments/assets/3b70513c-2f5e-494c-8bb7-eb8902d13d4a" />
