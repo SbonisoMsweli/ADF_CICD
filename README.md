@@ -4,11 +4,3 @@
 <img width="1399" height="177" alt="Azure Data Flows" src="https://github.com/user-attachments/assets/359f8520-61e3-49b0-b83f-4b3019ded048" />
 flowchart LR
 flowchart LR
-  A[On-Prem] --> D[Azure Data Factory]
-  B[Azure SQL] --> D
-  C[GitHub API] --> D
-  D --> E[Bronze]
-  E --> F[Silver]
-  F --> G[Gold]
-  G --> H[Azure Logic Apps]
-  D --> I[Azure DevOps]
